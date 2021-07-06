@@ -39,7 +39,7 @@ type krlHeader struct {
 
 #define KRL_SECTION_CERTIFICATES		1
 #define KRL_SECTION_EXPLICIT_KEY		2
-#define KRL_SECTION_FINGERPRINT_SHA1		3
+#define KRL_SECTION_FINGERPRINT_SHA256		3
 #define KRL_SECTION_SIGNATURE			4
 */
 type krlSection struct {
@@ -135,7 +135,7 @@ type krlExplicitKey struct {
 	string	public_key_hash[0]
 	....
 */
-type krlFingerprintSHA1 struct {
+type krlFingerprintSHA256 struct {
 	PublicKeyHash []byte
 
 	Rest []byte `ssh:"rest"`

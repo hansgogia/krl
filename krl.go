@@ -7,7 +7,7 @@ package krl
 
 import (
 	"bytes"
-	"crypto/sha1"
+	"crypto/sha256"
 	"io"
 	"math/big"
 	"sort"
@@ -268,13 +268,13 @@ func (k *KRLExplicitKeySection) marshal() []byte {
 	})
 }
 
-// KRLFingerprintSection revokes keys by their SHA1 fingerprints. It is
+// KRLFingerprintSection revokes keys by their SHA256 fingerprints. It is
 // semantically equivalent to--but is more space efficient than--
 // KRLExplicitKeySection.
-type KRLFingerprintSection [][sha1.Size]byte
+type KRLFingerprintSection [][sha256.Size]byte
 
 func (k *KRLFingerprintSection) isRevoked(key ssh.PublicKey) bool {
-	sha := sha1.Sum(marshalPubkey(key))
+	sha := sha256.Sum256(marshalPubkey(key))
 	for _, hash := range *k {
 		if hash == sha {
 			return true
@@ -283,7 +283,7 @@ func (k *KRLFingerprintSection) isRevoked(key ssh.PublicKey) bool {
 	return false
 }
 
-type bigEndian [][sha1.Size]byte
+type bigEndian [][sha256.Size]byte
 
 func (b bigEndian) Len() int {
 	return len(b)
@@ -310,7 +310,7 @@ func (k *KRLFingerprintSection) marshal() []byte {
 
 	var buf bytes.Buffer
 	for _, hash := range be {
-		buf.Write(ssh.Marshal(krlFingerprintSHA1{
+		buf.Write(ssh.Marshal(krlFingerprintSHA256{
 			PublicKeyHash: hash[:],
 		}))
 	}

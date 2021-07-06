@@ -1,7 +1,7 @@
 package krl
 
 import (
-	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 
 	"golang.org/x/crypto/ssh"
@@ -64,7 +64,7 @@ func ParseKRL(in []byte) (*KRL, error) {
 			section, err = parseCertificateSection(sdata.SectionData)
 		case 2: // KRL_SECTION_EXPLICIT_KEY
 			section, err = parseExplicitKeySection(sdata.SectionData)
-		case 3: // KRL_SECTION_FINGERPRINT_SHA1
+		case 3: // KRL_SECTION_FINGERPRINT_SHA256
 			section, err = parseFingerprintSection(sdata.SectionData)
 		default:
 			return nil, fmt.Errorf("krl: unexpected section type %d", sdata.SectionType)
@@ -221,15 +221,15 @@ func parseExplicitKeySection(in []byte) (*KRLExplicitKeySection, error) {
 func parseFingerprintSection(in []byte) (*KRLFingerprintSection, error) {
 	s := &KRLFingerprintSection{}
 	for len(in) > 0 {
-		var list krlFingerprintSHA1
+		var list krlFingerprintSHA256
 		if err := ssh.Unmarshal(in, &list); err != nil {
 			return nil, fmt.Errorf("krl: while parsing fingerprint in list: %v", err)
 		}
 		in = list.Rest
-		if len(list.PublicKeyHash) != sha1.Size {
-			return nil, fmt.Errorf("krl: key fingerprint wrong length for SHA1: %x", list.PublicKeyHash)
+		if len(list.PublicKeyHash) != sha256.Size {
+			return nil, fmt.Errorf("krl: key fingerprint wrong length for SHA256: %x", list.PublicKeyHash)
 		}
-		var sha [sha1.Size]byte
+		var sha [sha256.Size]byte
 		copy(sha[:], list.PublicKeyHash)
 		*s = append(*s, sha)
 	}
